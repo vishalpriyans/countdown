@@ -152,6 +152,13 @@
               Start
             </button>
             <button
+              id="fullscreenBtn"
+              type="button"
+              class="w-full sm:w-auto rounded-xl border border-white/15 bg-transparent px-6 py-3 text-sm font-semibold text-white/80 hover:bg-white/5 hover:text-white transition"
+            >
+              Full Screen
+            </button>
+            <button
               id="resetBtn"
               type="button"
               class="w-full sm:w-auto rounded-xl border border-white/15 bg-transparent px-6 py-3 text-sm font-semibold text-white/80 hover:bg-white/5 hover:text-white transition"
@@ -192,6 +199,7 @@
       const elProgressBar = document.getElementById('progressBar');
       const elProgressText = document.getElementById('progressText');
       const elStartPause = document.getElementById('startPauseBtn');
+      const elFullscreen = document.getElementById('fullscreenBtn');
       const elReset = document.getElementById('resetBtn');
       const elFinished = document.getElementById('finished');
 
@@ -268,12 +276,39 @@
         if (!overlay) return;
         overlay.classList.remove('is-opening');
         overlay.classList.add('is-active');
+
         void overlay.offsetWidth;
         overlay.classList.add('is-opening');
         window.setTimeout(() => {
           overlay.classList.remove('is-opening');
           overlay.classList.remove('is-active');
         }, 950);
+      }
+
+      function isFullscreen() {
+        return Boolean(document.fullscreenElement);
+      }
+
+      function updateFullscreenButton() {
+        if (!elFullscreen) return;
+        elFullscreen.textContent = isFullscreen() ? 'Exit Full Screen' : 'Full Screen';
+      }
+
+      async function toggleFullscreen() {
+        const target = document.documentElement;
+        try {
+          if (!isFullscreen()) {
+            if (target.requestFullscreen) {
+              await target.requestFullscreen();
+            }
+          } else {
+            if (document.exitFullscreen) {
+              await document.exitFullscreen();
+            }
+          }
+        } finally {
+          updateFullscreenButton();
+        }
       }
 
       elStartPause.addEventListener('click', () => {
@@ -305,7 +340,18 @@
         render();
       });
 
+      if (elFullscreen) {
+        elFullscreen.addEventListener('click', () => {
+          void toggleFullscreen();
+        });
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        updateFullscreenButton();
+      });
+
       render();
+      updateFullscreenButton();
     </script>
   </body>
 </html>
